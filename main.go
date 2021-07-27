@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/MihaiLupoiu/interview-exasol/handlers"
 )
 
 func main() {
-	handlers.NewHello("hello")
+	fmt.Println(handlers.Hello("World"))
 }
