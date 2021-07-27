@@ -1,0 +1,5 @@
+# Certificates
+*.pem
+*.key
+*.crt
+*.ca
