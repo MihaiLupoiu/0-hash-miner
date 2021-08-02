@@ -98,3 +98,34 @@ Notes:
 - It is possible to reach this service on the following ports:
   3336, 8083, 8446, 49155, 3481, 65532
 
+
+### RUN code
+
+```
+go run main.go -connect 18.202.148.130:3336
+```
+
+## TODOS
+- [x] Create package.
+- [x] Connect to server.
+- [x] Generate randon string.
+   - Using random uuid from google.
+   - Can genera a seperate string if required. 
+- [x] Calculate sha1.
+- [x] Calculate compare hash with dificulty.
+- [ ] Improve code structure to split responsibilities.
+   - [ ] main
+   - [ ] connection
+   - [ ] solver
+- [ ] Test functions. 
+   - Especially the solver for each dificulty.
+- [ ] Improve loggin.
+- [ ] Improve flags to specify log level, contact information. 
+- [ ] Benchmark functions like string generator and solver and profile to check what could be improved in the secuencial model.
+- [ ] Improve speed by implementing concurrency using a worker pool to calculate hash in multiple corutines.
+- [ ] Check performance increase and ajust the number of working coroutines in the worker pool.
+- [ ] Execute against the server in a multicore CPU with more than 2 cores than my 2013 i5 Macbook pro. 
+- [ ] Improve state machine processing. Low priority for now.
+- [ ] Show number of Hash/second.
+- [ ] Implement a SHA1 calculation using GPU.
+   - If time available, if not create a small explination on how it could be done.
