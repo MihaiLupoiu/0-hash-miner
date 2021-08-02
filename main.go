@@ -79,44 +79,44 @@ func run(args []string, stdout io.Writer) error {
 		case "NAME":
 			// as the response to the NAME request you should send your full name
 			// including first and last name separated by single space
-			// conn.write(SHA1(authdata+args[1]) + " " + "My name\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Name)
 
 		case "MAILNUM":
 			// here you specify, how many email addresses you want to send
 			// each email is asked separately up to the number specified in MAILNUM
-			// conn.write(SHA1(authdata+args[1]) + " " + "2\n")
+			conn.WriteSHA1String(authdata, line, strconv.Itoa(len(configuration.UserConfig.Mails)))
 
 		case "MAIL1":
-			// conn.write(SHA1(authdata+args[1]) + " " + "my.name@example.com\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Mails[1])
 
 		case "MAIL2":
-			// conn.write(SHA1(authdata+args[1]) + " " + "my.name2@example.com\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Mails[2])
 
 		case "SKYPE":
 			// here please specify your Skype account for the interview, or N/A
 			// in case you have no Skype account
-			// conn.write(SHA1(authdata+args[1]) + " " + "my.name@example.com\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Skype)
 
 		case "BIRTHDATE":
 			// here please specify your birthdate in the format %d.%m.%Y
-			// conn.write(SHA1(authdata+args[1]) + " " + "01.02.2017\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.BirthDate)
 
 		case "COUNTRY":
 			// country where you currently live and where the specified address is
 			// please use only the names from this web site:
 			//   https://www.countries-ofthe-world.com/all-countries.html
-			// conn.write(SHA1(authdata+args[1]) + " " + "Germany\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Country)
 
 		case "ADDRNUM":
 			// specifies how many lines your address has, this address should
 			// be in the specified country
-			// conn.write(SHA1(authdata+args[1]) + " " + "2\n")
+			conn.WriteSHA1String(authdata, line, strconv.Itoa(len(configuration.UserConfig.Addess)))
 
 		case "ADDRLINE1":
-			// conn.write(SHA1(authdata+args[1]) + " " + "Long street 3\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Addess[1])
 
 		case "ADDRLINE2":
-			// conn.write(SHA1(authdata+args[1]) + " " + "32345 Big city\n")
+			conn.WriteSHA1String(authdata, line, configuration.UserConfig.Addess[2])
 
 		default:
 			if strings.HasPrefix(line, "POW") {

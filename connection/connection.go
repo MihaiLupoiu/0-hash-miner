@@ -1,7 +1,9 @@
 package connection
 
 import (
+	"crypto/sha1"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	"log"
 )
@@ -53,6 +55,11 @@ func (c *Connection) Write(b []byte) (int, error) {
 
 func (c *Connection) WriteString(b string) (int, error) {
 	return c.conn.Write([]byte(b + "\n"))
+}
+
+func (c *Connection) WriteSHA1String(authdata, arg, arg2 string) (int, error) {
+	hash := sha1.Sum([]byte(authdata + arg))
+	return c.WriteString(hex.EncodeToString(hash[:]) + " " + arg2)
 }
 
 func (c *Connection) Reconnecte() error {
