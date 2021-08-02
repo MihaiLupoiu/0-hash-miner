@@ -3,3 +3,4 @@
 *.key
 *.crt
 *.ca
+config/config.json

@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/textproto"
 	"os"
@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MihaiLupoiu/interview-exasol/config"
 	"github.com/MihaiLupoiu/interview-exasol/connection"
 	"github.com/MihaiLupoiu/interview-exasol/solver"
 	"github.com/google/uuid"
@@ -26,25 +27,30 @@ func hashRate() {
 	}
 }
 
-func main() {
-	endpoint := flag.String("connect", "localhost:4433", "who to connect to")
-	crt := flag.String("crt", "./configs/certs/public.crt", "certificate")
-	key := flag.String("key", "./configs/certs/private.key", "key")
-	flag.Parse()
+const (
+	// exitFail is the exit code if the program
+	// fails.
+	exitFail = 1
+)
 
-	addr := *endpoint
-	if !strings.Contains(addr, ":") {
-		addr += ":443"
+func main() {
+	if err := run(os.Args, os.Stdout); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(exitFail)
 	}
+}
+
+func run(args []string, stdout io.Writer) error {
+	configuration := config.Get()
 
 	// -----
 
-	conn, err := connection.Dial(*crt, *key, *endpoint)
+	conn, err := connection.Dial(configuration.Crt, configuration.Key, configuration.Endpoint)
 	if err != nil {
 		log.Fatalf("failed to connect: %s", err.Error())
 	}
 	defer conn.Close()
-	log.Printf("connect to %s succeed", addr)
+	log.Printf("connect to %s succeed", configuration.Endpoint)
 	conn.PrintConnState()
 
 	// -----
@@ -136,16 +142,13 @@ func main() {
 					if solver.Check(authdata, suffix, difficulty) != "" {
 						fmt.Printf("Authdata: %s\n Suffix: %s\n", authdata, suffix)
 						conn.WriteString(suffix)
-						break
+						return nil
 					}
 				}
 			} else if strings.HasPrefix(line, "ERROR") {
 				fmt.Println(line)
-				break
+				return nil
 			}
 		}
-
-		// do something with data here, concat, handle and etc...
 	}
-
 }

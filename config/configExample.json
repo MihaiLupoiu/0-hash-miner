@@ -1,0 +1,10 @@
+{
+    "Name":"NAME",
+    "MailNum":1,
+    "Mail":["MAIL1"],
+    "Skype":"NAME",
+    "BirthDate":"NAME",
+    "Country":"NAME",
+    "AddrNum":1,
+    "Addess":["AddresLine1"]
+}
