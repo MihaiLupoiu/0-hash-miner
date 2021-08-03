@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/MihaiLupoiu/interview-exasol/workflows/build/badge.svg)](https://github.com/MihaiLupoiu/interview-exasol/actions)
+
 As part of our application process, we would like you to write a test
 program that we could later discuss in your interview. The data you
 send using the program will be used for further communication with
