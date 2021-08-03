@@ -14,8 +14,17 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
+    # Run vet & lint on the code
+    - name: Run vet & lint
+      run: |
+        go vet .
+        golint .
     - name: Test
       run: go test ./...
+    # Run build of the application
+    - name: Run build
+      run: go build . 
+      
 
   test-cache:
     runs-on: ubuntu-latest
