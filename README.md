@@ -121,13 +121,13 @@ go run main.go -connect 18.202.148.130:3336
    - Especially the solver for each dificulty.
 - [ ] Improve loggin.
 - [ ] Improve flags to specify log level.
-- [ ] Add contact information in a configuration file. 
+- [x] Add contact information in a configuration file. 
 - [ ] Benchmark functions like string generator and solver and profile to check what could be improved in the secuencial model.
 - [ ] Improve speed by implementing concurrency using a worker pool to calculate hash in multiple corutines.
 - [ ] Check performance increase and ajust the number of working coroutines in the worker pool.
 - [ ] Execute against the server in a multicore CPU with more than 2 cores than my 2013 i5 Macbook pro. 
 - [ ] Improve state machine processing. Low priority for now.
-- [ ] Show number of Hash/second.
+- [x] Show number of Hash/second.
 - [ ] Documentation in code and architecture diagram.
 - [ ] Implement a SHA1 calculation using GPU.
    - If time available, if not create a small explination on how it could be done.
