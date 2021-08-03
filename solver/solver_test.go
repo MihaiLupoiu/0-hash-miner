@@ -3,6 +3,7 @@ package solver
 import (
 	"testing"
 
+	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/google/uuid"
 )
 
@@ -63,6 +64,34 @@ func BenchmarkCheckConstantString(b *testing.B) {
 func BenchmarkCheckWithUUID(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		suffix := uuid.New().String()
+		Check("", suffix, 9)
+	}
+}
+
+func BenchmarkCheckWithRandomString10(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		suffix, _ := utils.RandStringRunes(10)
+		Check("", suffix, 9)
+	}
+}
+
+func BenchmarkCheckWithRandomString20(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		suffix, _ := utils.RandStringRunes(20)
+		Check("", suffix, 9)
+	}
+}
+
+func BenchmarkCheckWithRandomString30(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		suffix, _ := utils.RandStringRunes(30)
+		Check("", suffix, 9)
+	}
+}
+
+func BenchmarkCheckWithRandomString32(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		suffix, _ := utils.RandStringRunes(32)
 		Check("", suffix, 9)
 	}
 }

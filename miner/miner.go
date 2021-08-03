@@ -13,7 +13,7 @@ import (
 	"github.com/MihaiLupoiu/interview-exasol/config"
 	"github.com/MihaiLupoiu/interview-exasol/connection"
 	"github.com/MihaiLupoiu/interview-exasol/solver"
-	"github.com/google/uuid"
+	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/paulbellamy/ratecounter"
 )
 
@@ -114,7 +114,7 @@ func Init(configuration config.Data) error {
 					// generate short random string, server accepts all utf-8 characters,
 					// except [\n\r\t ], it means that the suffix should not contain the
 					// characters: newline, carriege return, tab and space
-					suffix := uuid.New().String()
+					suffix, _ := utils.RandStringRunes(30)
 					counter.Incr(1)
 
 					if solver.Check(authdata, suffix, difficulty) != "" {

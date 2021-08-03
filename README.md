@@ -109,14 +109,11 @@ go run main.go -connect 18.202.148.130:3336
 - [x] Create package.
 - [x] Connect to server.
 - [x] Generate randon string.
-   - Using random uuid from google.
-   - Can genera a seperate string if required. 
+   - ~~Using random uuid from google.~~
+   - Generating random string using math/rand for speed performance. Also available the SecureRandomString to generate a cryptography secure random. 
 - [x] Calculate sha1.
 - [x] Calculate compare hash with dificulty.
 - [ ] Improve code structure to split responsibilities.
-   - [ ] main
-   - [ ] connection
-   - [ ] solver
 - [ ] Test functions. 
    - Especially the solver for each dificulty.
 - [ ] Improve loggin.
