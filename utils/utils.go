@@ -3,7 +3,11 @@ package utils
 
 import (
 	"crypto/rand"
+	"fmt"
 	mrand "math/rand"
+	"time"
+
+	"github.com/paulbellamy/ratecounter"
 )
 
 const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -36,4 +40,10 @@ func RandStringRunes(length int) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func HashRate(counter *ratecounter.RateCounter) {
+	for range time.Tick(time.Second * 1) {
+		fmt.Println("Hash rate:", counter.Rate())
+	}
 }

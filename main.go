@@ -25,5 +25,10 @@ func main() {
 func run(args []string, stdout io.Writer) error {
 	configuration := config.Get()
 
-	return miner.Init(configuration)
+	minerCtx, err := miner.Init(configuration)
+	if err != nil {
+		return err
+	}
+
+	return minerCtx.Run()
 }
