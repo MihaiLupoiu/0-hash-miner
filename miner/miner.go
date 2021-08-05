@@ -54,6 +54,9 @@ func Init(configuration config.Data) (*Miner, error) {
 func (ctx *Miner) Run() error {
 	defer ctx.Conn.Close()
 
+	stopHashRate := make(chan bool)
+	go utils.HashRate(ctx.Counter, stopHashRate)
+
 	connTextReader := textproto.NewReader(bufio.NewReader(ctx.Conn))
 	for {
 		// read one line (ended with \n or \r\n)
@@ -126,7 +129,6 @@ func (ctx *Miner) Run() error {
 				}
 
 				fmt.Println(ctx.Authdata, difficulty)
-				go utils.HashRate(ctx.Counter)
 				for {
 					// generate short random string, server accepts all utf-8 characters,
 					// except [\n\r\t ], it means that the suffix should not contain the
@@ -137,6 +139,8 @@ func (ctx *Miner) Run() error {
 					if solver.Check(ctx.Authdata, suffix, difficulty) != "" {
 						fmt.Printf("Authdata: %s\n Suffix: %s\n", ctx.Authdata, suffix)
 						ctx.Conn.WriteString(suffix)
+						// Stop goroutine hashRate
+						stopHashRate <- true
 						return nil
 					}
 				}

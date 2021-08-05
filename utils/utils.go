@@ -42,8 +42,19 @@ func RandStringRunes(length int) (string, error) {
 	return string(bytes), nil
 }
 
-func HashRate(counter *ratecounter.RateCounter) {
-	for range time.Tick(time.Second * 1) {
-		fmt.Println("Hash rate:", counter.Rate())
+// TODO: Add channel to close goroutine gracefully
+func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
+	t := time.NewTimer(time.Second)
+	interval := time.Second * time.Duration(1)
+
+	for {
+		select {
+		case <-stop:
+			fmt.Println("Closing HashRate gorutine")
+			return
+		case <-t.C:
+			fmt.Println("Hash rate:", counter.Rate())
+		}
+		t.Reset(interval)
 	}
 }
