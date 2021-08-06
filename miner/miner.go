@@ -3,7 +3,6 @@ package miner
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net/textproto"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/MihaiLupoiu/interview-exasol/config"
 	"github.com/MihaiLupoiu/interview-exasol/connection"
-	"github.com/MihaiLupoiu/interview-exasol/solver"
 	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/MihaiLupoiu/interview-exasol/worker"
 	"github.com/paulbellamy/ratecounter"
@@ -43,56 +41,6 @@ func connect(configuration config.Data) (*connection.Connection, error) {
 	conn.PrintConnState()
 
 	return conn, err
-}
-
-func (ctx *Miner) generateWork(suffixLength int, stop chan bool) {
-	for {
-		select {
-		case <-stop:
-			fmt.Println("Closing HashRate gorutine")
-			return
-		default:
-			// generate short random string, server accepts all utf-8 characters,
-			// except [\n\r\t ], it means that the suffix should not contain the
-			// characters: newline, carriege return, tab and space
-			suffix, _ := utils.RandStringRunes(suffixLength)
-			ctx.Counter.Incr(1)
-
-			ctx.WPool.SendJob(worker.Job{
-				ID:     suffix,
-				ExecFn: solver.CalculateHash,
-				Args:   ctx.Authdata + suffix,
-			})
-		}
-	}
-}
-
-func (ctx *Miner) checkResults(difficulty int) (string, error) {
-	select {
-	case r, ok := <-ctx.WPool.Results():
-		if !ok {
-			return "", errors.New("could not read results")
-		}
-
-		if r.Err == nil {
-			suffix := r.JobID
-			hash := r.Value.([20]byte)
-
-			if solver.CheckDificulty(hash, difficulty) {
-				return suffix, nil
-			}
-		} else {
-			if r.Err != context.Canceled { // Context error do to context cancellation to stop gorutines.
-				fmt.Printf("unexpected error: %v", r.Err)
-				return "", r.Err
-			}
-		}
-
-	case <-ctx.WPool.Done:
-		return "", nil
-	}
-
-	return "", nil
 }
 
 // Init miner with configuration with connection data and user information.
@@ -191,17 +139,17 @@ func (ctx *Miner) Run() error {
 					log.Fatalf("Difficulty of POW not integer: %s", err.Error())
 				}
 				fmt.Println("Authdata: ", ctx.Authdata, "Dificulty: ", difficulty)
-				go ctx.generateWork(randomStringLength, stop)
 
-				for {
-					if suff, err := ctx.checkResults(difficulty); err == nil && suff != "" {
-						fmt.Println("Suff: ", suff)
-						ctx.Conn.WriteString(suff)
-						break
-					}
+				jobs := GenerateWorkerJobs(ctx.WPool.GetWorkerCount(), difficulty, randomStringLength, ctx.Authdata, ctx.Counter)
+				go ctx.WPool.SendBulkJobs(jobs)
+
+				if suff, err := GetResults(ctx.WPool); err == nil && suff != "" {
+					fmt.Println("Suff: ", suff)
+					ctx.Conn.WriteString(suff)
+					break
 				}
-				// Stop goroutine hashRate and generateWork
-				stop <- true
+
+				// Stop goroutine hashRate
 				stop <- true
 				close(stop)
 

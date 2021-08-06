@@ -50,7 +50,7 @@ func Get() Data {
 	flag.StringVar(&config.Endpoint, "connect", "localhost:4433", "who to connect to")
 	flag.StringVar(&config.Crt, "crt", "./config/certs/public.crt", "certificate")
 	flag.StringVar(&config.Key, "key", "./config/certs/private.key", "key")
-	flag.IntVar(&config.Workers, "workers", runtime.NumCPU()*4, "number of workers to run in the pool")
+	flag.IntVar(&config.Workers, "workers", runtime.NumCPU(), "number of workers to run in the pool")
 
 	userConfigFilePath := flag.String("userConfigFile", "./config/config.json", "JSON config file to read.")
 	flag.Parse()

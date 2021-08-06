@@ -22,6 +22,10 @@ func New(wcount int) Pool {
 	}
 }
 
+func (wp Pool) GetWorkerCount() int {
+	return wp.workersCount
+}
+
 func (wp Pool) Run(ctx context.Context) {
 	var wg sync.WaitGroup
 
@@ -33,11 +37,17 @@ func (wp Pool) Run(ctx context.Context) {
 	wg.Wait()
 	close(wp.Done)
 	close(wp.results)
-	close(wp.jobs)
 }
 
 func (wp Pool) SendJob(job Job) {
 	wp.jobs <- job
+}
+
+func (wp Pool) SendBulkJobs(jobsBulk []Job) {
+	for _, job := range jobsBulk {
+		wp.jobs <- job
+	}
+	close(wp.jobs)
 }
 
 func (wp Pool) Results() <-chan Result {

@@ -53,7 +53,7 @@ func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
 			fmt.Println("Closing HashRate gorutine")
 			return
 		case <-t.C:
-			fmt.Println("Hash rate:", counter.Rate())
+			fmt.Println(float64(counter.Rate())/float64(1000000), "Mh/s")
 		}
 		t.Reset(interval)
 	}

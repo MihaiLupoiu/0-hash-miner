@@ -122,10 +122,16 @@ go run main.go -connect 18.202.148.130:3336
 - [ ] Improve loggin using zap. 
 - [ ] Improve flags to specify log level.
 - [x] Add contact information in a configuration file. 
-- [ ] Benchmark functions like string generator and solver and profile to check what could be improved in the secuencial model.
-- [ ] Improve speed by implementing concurrency using a worker pool to calculate hash in multiple corutines.
-- [ ] Check performance increase and ajust the number of working coroutines in the worker pool.
-- [ ] Execute against the server in a multicore CPU with more than 2 cores than my 2013 i5 Macbook pro. 
+- [x] Benchmark functions like string generator and solver and profile to check what could be improved in the secuencial model.
+   - Done several tests and implementations for it. 
+- [x] Improve speed by implementing concurrency using a worker pool to calculate hash in multiple corutines.
+   - Implemented a general worker pool so it can be easly changed the function to execute.
+- [X] Check performance increase and ajust the number of working coroutines in the worker pool.
+   - Yes in increased but after making some changes in the gorutine. The initial implementation was waiting too much time for work so it was not taking advantage of all the CPU cores because it was communicating too much data.
+   - Second implementation was executing the process completlly independent and was able to take full advantage of the CPUs.
+- [x] Execute against the server in a multicore CPU with more than 2 cores than my 2013 i5 Macbook pro. 
+   - Tried a 32 Core from Scaleway for this test. Not recommended. The CPU was only using 10 out of the 32 cores in the same time.
+   - Tested in local I5 CPU and got an increase MH/s from 1,4 in th Mac to 3,2 MH/s.
 - [ ] Improve state machine processing. Low priority for now.
 - [x] Show number of Hash/second.
 - [ ] Documentation in code and architecture diagram.
