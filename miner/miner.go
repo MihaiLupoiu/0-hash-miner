@@ -2,6 +2,8 @@ package miner
 
 import (
 	"bufio"
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/textproto"
@@ -14,6 +16,7 @@ import (
 	"github.com/MihaiLupoiu/interview-exasol/connection"
 	"github.com/MihaiLupoiu/interview-exasol/solver"
 	"github.com/MihaiLupoiu/interview-exasol/utils"
+	"github.com/MihaiLupoiu/interview-exasol/worker"
 	"github.com/paulbellamy/ratecounter"
 )
 
@@ -22,7 +25,12 @@ type Miner struct {
 	Conn       *connection.Connection
 	Counter    *ratecounter.RateCounter
 	UserConfig config.UserConfig
+	WPool      worker.Pool
 }
+
+var (
+	randomStringLength = 15
+)
 
 func connect(configuration config.Data) (*connection.Connection, error) {
 	conn, err := connection.Dial(configuration.Crt, configuration.Key, configuration.Endpoint)
@@ -37,6 +45,56 @@ func connect(configuration config.Data) (*connection.Connection, error) {
 	return conn, err
 }
 
+func (ctx *Miner) generateWork(suffixLength int, stop chan bool) {
+	for {
+		select {
+		case <-stop:
+			fmt.Println("Closing HashRate gorutine")
+			return
+		default:
+			// generate short random string, server accepts all utf-8 characters,
+			// except [\n\r\t ], it means that the suffix should not contain the
+			// characters: newline, carriege return, tab and space
+			suffix, _ := utils.RandStringRunes(suffixLength)
+			ctx.Counter.Incr(1)
+
+			ctx.WPool.SendJob(worker.Job{
+				ID:     suffix,
+				ExecFn: solver.CalculateHash,
+				Args:   ctx.Authdata + suffix,
+			})
+		}
+	}
+}
+
+func (ctx *Miner) checkResults(difficulty int) (string, error) {
+	select {
+	case r, ok := <-ctx.WPool.Results():
+		if !ok {
+			return "", errors.New("could not read results")
+		}
+
+		if r.Err == nil {
+			suffix := r.JobID
+			hash := r.Value.([20]byte)
+
+			if solver.CheckDificulty(hash, difficulty) {
+				return suffix, nil
+			}
+		} else {
+			if r.Err != context.Canceled { // Context error do to context cancellation to stop gorutines.
+				fmt.Printf("unexpected error: %v", r.Err)
+				return "", r.Err
+			}
+		}
+
+	case <-ctx.WPool.Done:
+		return "", nil
+	}
+
+	return "", nil
+}
+
 // Init miner with configuration with connection data and user information.
 func Init(configuration config.Data) (*Miner, error) {
 	conn, err := connect(configuration)
@@ -48,14 +106,21 @@ func Init(configuration config.Data) (*Miner, error) {
 		Conn:       conn,
 		Counter:    ratecounter.NewRateCounter(1 * time.Second),
 		UserConfig: configuration.UserConfig,
+		WPool:      worker.New(configuration.Workers),
 	}, err
 }
 
 func (ctx *Miner) Run() error {
 	defer ctx.Conn.Close()
 
-	stopHashRate := make(chan bool)
-	go utils.HashRate(ctx.Counter, stopHashRate)
+	context, cancelWorkerPool := context.WithCancel(context.Background())
+	defer cancelWorkerPool()
+
+	// Start workers
+	go ctx.WPool.Run(context)
+
+	stop := make(chan bool, 1)
+	go utils.HashRate(ctx.Counter, stop)
 
 	connTextReader := textproto.NewReader(bufio.NewReader(ctx.Conn))
 	for {
@@ -118,8 +183,6 @@ func (ctx *Miner) Run() error {
 
 		default:
 			if strings.HasPrefix(line, "POW") {
-				fmt.Println(line)
-				fmt.Println("Time to work")
 				args := strings.Fields(line)
 
 				ctx.Authdata = args[1]
@@ -127,23 +190,21 @@ func (ctx *Miner) Run() error {
 				if err != nil {
 					log.Fatalf("Difficulty of POW not integer: %s", err.Error())
 				}
+				fmt.Println("Authdata: ", ctx.Authdata, "Dificulty: ", difficulty)
+				go ctx.generateWork(randomStringLength, stop)
 
-				fmt.Println(ctx.Authdata, difficulty)
 				for {
-					// generate short random string, server accepts all utf-8 characters,
-					// except [\n\r\t ], it means that the suffix should not contain the
-					// characters: newline, carriege return, tab and space
-					suffix, _ := utils.RandStringRunes(30)
-					ctx.Counter.Incr(1)
-
-					if solver.Check(ctx.Authdata, suffix, difficulty) != "" {
-						fmt.Printf("Authdata: %s\n Suffix: %s\n", ctx.Authdata, suffix)
-						ctx.Conn.WriteString(suffix)
-						// Stop goroutine hashRate
-						stopHashRate <- true
-						return nil
+					if suff, err := ctx.checkResults(difficulty); err == nil && suff != "" {
+						fmt.Println("Suff: ", suff)
+						ctx.Conn.WriteString(suff)
+						break
 					}
 				}
+				// Stop goroutine hashRate and generateWork
+				stop <- true
+				stop <- true
+				close(stop)
+
 			} else if strings.HasPrefix(line, "ERROR") {
 				fmt.Println(line)
 				return nil

@@ -1,13 +1,15 @@
 package solver
 
 import (
+	"context"
+	"reflect"
 	"testing"
 
 	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/google/uuid"
 )
 
-func TestCheck(t *testing.T) {
+func TestCalculateAndCheckHash(t *testing.T) {
 	type args struct {
 		authdata   string
 		suffix     string
@@ -48,8 +50,8 @@ func TestCheck(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Check(tt.args.authdata, tt.args.suffix, tt.args.difficulty); got != tt.want {
-				t.Errorf("Check() = %v, want %v", got, tt.want)
+			if got := CalculateAndCheckHash(tt.args.authdata, tt.args.suffix, tt.args.difficulty); got != tt.want {
+				t.Errorf("CalculateAndCheckHash() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -57,41 +59,121 @@ func TestCheck(t *testing.T) {
 
 func BenchmarkCheckConstantString(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Check("", "aa", 9)
+		CalculateAndCheckHash("", "aa", 9)
 	}
 }
 
 func BenchmarkCheckWithUUID(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		suffix := uuid.New().String()
-		Check("", suffix, 9)
+		CalculateAndCheckHash("", suffix, 9)
 	}
 }
 
 func BenchmarkCheckWithRandomString10(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		suffix, _ := utils.RandStringRunes(10)
-		Check("", suffix, 9)
+		CalculateAndCheckHash("", suffix, 9)
 	}
 }
 
 func BenchmarkCheckWithRandomString20(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		suffix, _ := utils.RandStringRunes(20)
-		Check("", suffix, 9)
+		CalculateAndCheckHash("", suffix, 9)
 	}
 }
 
 func BenchmarkCheckWithRandomString30(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		suffix, _ := utils.RandStringRunes(30)
-		Check("", suffix, 9)
+		CalculateAndCheckHash("", suffix, 9)
 	}
 }
 
 func BenchmarkCheckWithRandomString32(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		suffix, _ := utils.RandStringRunes(32)
-		Check("", suffix, 9)
+		CalculateAndCheckHash("", suffix, 9)
+	}
+}
+
+func TestCalculateHash(t *testing.T) {
+	type args struct {
+		ctx  context.Context
+		args interface{}
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    interface{}
+		wantErr bool
+	}{
+		{
+			name: "should work sha1",
+			args: args{
+				ctx:  context.TODO(),
+				args: "l",
+			},
+			want:    [20]byte{7, 195, 66, 190, 110, 86, 14, 127, 67, 132, 46, 46, 33, 183, 116, 230, 29, 133, 240, 71},
+			wantErr: false,
+		},
+		{
+			name: "should fail with wrong type of argument",
+			args: args{
+				ctx:  context.TODO(),
+				args: 18,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CalculateHash(tt.args.ctx, tt.args.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CalculateHash() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CalculateHash() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCheckDificulty(t *testing.T) {
+	type args struct {
+		hash      [20]byte
+		dificulty int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "should return true",
+			args: args{
+				hash:      [20]byte{7, 195, 66, 190, 110, 86, 14, 127, 67, 132, 46, 46, 33, 183, 116, 230, 29, 133, 240, 71},
+				dificulty: 1,
+			},
+			want: true,
+		},
+		{
+			name: "should return false",
+			args: args{
+				hash:      [20]byte{7, 195, 66, 190, 110, 86, 14, 127, 67, 132, 46, 46, 33, 183, 116, 230, 29, 133, 240, 71},
+				dificulty: 2,
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CheckDificulty(tt.args.hash, tt.args.dificulty); got != tt.want {
+				t.Errorf("CheckDificulty() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

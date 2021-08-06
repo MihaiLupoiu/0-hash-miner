@@ -1,8 +1,10 @@
 package solver
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"strings"
 )
 
@@ -16,8 +18,8 @@ func hexStartsWith(hash [20]byte, dificulty int) bool {
 	return res
 }
 
-// Check calculates the SHA1 of the authdata + suffix and that it starst with as meny 0s as the difficulty number.
-func Check(authdata, suffix string, difficulty int) string {
+// CalculateAndCheckHash calculates the SHA1 of the authdata + suffix and that it starst with as meny 0s as the difficulty number.
+func CalculateAndCheckHash(authdata, suffix string, difficulty int) string {
 	cksum_in_hex := sha1.Sum([]byte(authdata + suffix))
 	// fmt.Printf("  SHA1: %x\n", cksum_in_hex)
 
@@ -28,4 +30,17 @@ func Check(authdata, suffix string, difficulty int) string {
 	}
 
 	return ""
+}
+
+func CalculateHash(ctx context.Context, args interface{}) (interface{}, error) {
+	argVal, ok := args.(string)
+	if !ok {
+		return nil, errors.New("wrong argument type")
+	}
+
+	return sha1.Sum([]byte(argVal)), nil
+}
+
+func CheckDificulty(hash [20]byte, dificulty int) bool {
+	return hexStartsWith(hash, dificulty)
 }

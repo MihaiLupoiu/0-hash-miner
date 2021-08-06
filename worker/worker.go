@@ -1,4 +1,4 @@
-package workerpool
+package worker
 
 import (
 	"context"
@@ -6,15 +6,15 @@ import (
 	"sync"
 )
 
-type WorkerPool struct {
+type Pool struct {
 	workersCount int
 	jobs         chan Job
 	results      chan Result
 	Done         chan struct{}
 }
 
-func New(wcount int) WorkerPool {
-	return WorkerPool{
+func New(wcount int) Pool {
+	return Pool{
 		workersCount: wcount,
 		jobs:         make(chan Job, wcount),
 		results:      make(chan Result, wcount),
@@ -22,7 +22,7 @@ func New(wcount int) WorkerPool {
 	}
 }
 
-func (wp WorkerPool) Run(ctx context.Context) {
+func (wp Pool) Run(ctx context.Context) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < wp.workersCount; i++ {
@@ -36,17 +36,17 @@ func (wp WorkerPool) Run(ctx context.Context) {
 	close(wp.jobs)
 }
 
-func (wp WorkerPool) SendJob(job Job) {
+func (wp Pool) SendJob(job Job) {
 	wp.jobs <- job
 }
 
-func (wp WorkerPool) Results() <-chan Result {
+func (wp Pool) Results() <-chan Result {
 	return wp.results
 }
 
 // TODO: review how to close safly the channel.
 // https://go101.org/article/channel-closing.html
-func (wp WorkerPool) StopJobs() {
+func (wp Pool) StopJobs() {
 	close(wp.jobs)
 }
 
