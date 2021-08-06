@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/MihaiLupoiu/interview-exasol/solver"
 	"github.com/MihaiLupoiu/interview-exasol/utils"
@@ -26,9 +24,6 @@ func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 	if !ok {
 		return nil, errors.New("wrong argument type")
 	}
-
-	fmt.Println("Seed: ", time.Now().UTC().UnixNano()+argVal.Seed)
-	rand.Seed(time.Now().UTC().UnixNano() + argVal.Seed)
 
 	for {
 		// generate short random string, server accepts all utf-8 characters,
