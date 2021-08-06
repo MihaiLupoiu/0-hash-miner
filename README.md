@@ -119,7 +119,7 @@ go run main.go -connect 18.202.148.130:3336
 - [ ] Improve code structure to split responsibilities.
 - [ ] Test functions. 
    - Especially the solver for each dificulty.
-- [ ] Improve loggin.
+- [ ] Improve loggin using zap. 
 - [ ] Improve flags to specify log level.
 - [x] Add contact information in a configuration file. 
 - [ ] Benchmark functions like string generator and solver and profile to check what could be improved in the secuencial model.
