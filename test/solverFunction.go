@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"log"
@@ -28,12 +30,17 @@ func track(s string, startTime time.Time) {
 	log.Println("End:	", s, "took", endTime.Sub(startTime))
 }
 
-func execute(difficulty int, stringLength int) {
+func execute(authdata string, difficulty int, minStringLength, maxStringLength int) {
 	defer track(runningtime("simple"))
-	// using authdata from a connection request.
-	authdata := "cQokBByiRKwFNFhsXUvtTuEwRPwXdFjBeLjelxqPXoQHhIZaXMucoBSBpKFRkDFR"
+
+	hashrateCounter := ratecounter.NewRateCounter(1 * time.Second)
+	stop := make(chan bool, 1)
+	go utils.HashRate(hashrateCounter, stop)
+
 	for {
-		suffix, _ := utils.RandStringRunes(stringLength)
+		length := rand.Intn(maxStringLength-minStringLength+1) + minStringLength
+		suffix, _ := utils.RandStringRunes(length)
+		hashrateCounter.Incr(1)
 		if solver.CalculateAndCheckHash(authdata, suffix, difficulty) != "" {
 			fmt.Printf("Authdata: %s\nSuffix: %s\nDifficulty: %d\n", authdata, suffix, difficulty)
 			break
@@ -41,14 +48,12 @@ func execute(difficulty int, stringLength int) {
 	}
 }
 
-func testCorutine(workers, difficulty, suffixLength int) {
+func testCorutine(authdata string, workers, difficulty, minStringlength, maxStringLength int) {
 	defer track(runningtime("gorutines"))
 
-	rand.Seed(1) // Set random number to make calculate the same hash values.
-	authdata := "fSHmbbPePDavjmRTSdOITaUnTtBkbPcnIiYjWemfoBMUoGZNTmIPrnNEUAGtYrKn"
 	fmt.Println(authdata, difficulty)
 
-	wp := worker.New(4)
+	wp := worker.New(workers)
 	hashrateCounter := ratecounter.NewRateCounter(1 * time.Second)
 
 	context, cancelWorkerPool := context.WithCancel(context.Background())
@@ -59,23 +64,31 @@ func testCorutine(workers, difficulty, suffixLength int) {
 	stop := make(chan bool, 1)
 	go utils.HashRate(hashrateCounter, stop)
 
-	jobs := miner.GenerateWorkerJobs(wp.GetWorkerCount(), difficulty, suffixLength, authdata, hashrateCounter)
+	jobs := miner.GenerateWorkerJobs(wp.GetWorkerCount(), difficulty, minStringlength, maxStringLength, authdata, hashrateCounter)
 	go wp.SendBulkJobs(jobs)
 
 	if suff, err := miner.GetResults(wp); err == nil && suff != "" {
-		fmt.Println("Suff: ", suff)
+		hash := sha1.Sum([]byte(authdata + suff))
+		fmt.Println(hex.EncodeToString(hash[:]))
 		stop <- true
 	}
 }
 
 func main() {
 	var difficulty int
-	var suffixLength int
+	var minStringlength int
+	var maxStringLength int
+	var workers int
 	flag.IntVar(&difficulty, "diff", 6, "Difficulty is the number of 0 in hex")
-	flag.IntVar(&suffixLength, "suff", 15, "suffixLength is the size of the random string to generate")
+	flag.IntVar(&minStringlength, "minS", 15, "minStringlength is the minimum size of the random string to generate")
+	flag.IntVar(&maxStringLength, "maxS", 30, "maxStringLength is the maximum size of the random string to generate")
+	flag.IntVar(&workers, "workers", runtime.NumCPU(), "number of workers to run in the pool")
+
 	flag.Parse()
 
-	rand.Seed(1) // Set random number to make calculate the same hash values.
+	// using authdata from a connection request.
+	// authdata := "fSHmbbPePDavjmRTSdOITaUnTtBkbPcnIiYjWemfoBMUoGZNTmIPrnNEUAGtYrKn"
+	authdata := "cQokBByiRKwFNFhsXUvtTuEwRPwXdFjBeLjelxqPXoQHhIZaXMucoBSBpKFRkDFR"
 
 	f, err := os.Create("cpu.pprof")
 	if err != nil {
@@ -87,7 +100,9 @@ func main() {
 	}
 	defer pprof.StopCPUProfile()
 
-	testCorutine(runtime.NumCPU(), difficulty, suffixLength)
+	rand.Seed(1) // Set random number to make calculate the same hash values.
+
+	testCorutine(authdata, workers, difficulty, minStringlength, maxStringLength)
 
 	f2, err := os.Create("mem.pprof")
 	if err != nil {
@@ -101,7 +116,6 @@ func main() {
 
 	rand.Seed(1) // Set random number to make calculate the same hash values.
 
-	for i := 0; i <= difficulty; i++ {
-		execute(i, suffixLength)
-	}
+	execute(authdata, difficulty, minStringlength, maxStringLength)
+
 }

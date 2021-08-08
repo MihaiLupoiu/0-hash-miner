@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"github.com/MihaiLupoiu/interview-exasol/solver"
 	"github.com/MihaiLupoiu/interview-exasol/utils"
@@ -14,7 +15,8 @@ import (
 type Args struct {
 	Authdata        string
 	Difficulty      int
-	SuffixLength    int
+	MinSuffixLength int
+	MaxSuffixLength int
 	Seed            int64
 	HashrateCounter *ratecounter.RateCounter
 }
@@ -29,7 +31,9 @@ func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 		// generate short random string, server accepts all utf-8 characters,
 		// except [\n\r\t ], it means that the suffix should not contain the
 		// characters: newline, carriege return, tab and space
-		suffix, _ := utils.RandStringRunes(argVal.SuffixLength)
+
+		length := rand.Intn(argVal.MaxSuffixLength-argVal.MinSuffixLength+1) + argVal.MinSuffixLength
+		suffix, _ := utils.RandStringRunes(length)
 		argVal.HashrateCounter.Incr(1)
 
 		if solver.CalculateAndCheckHash(argVal.Authdata, suffix, argVal.Difficulty) != "" {
@@ -43,7 +47,7 @@ func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 	}
 }
 
-func GenerateWorkerJobs(jobsCount, difficulty, suffixLength int, authdata string, counter *ratecounter.RateCounter) []worker.Job {
+func GenerateWorkerJobs(jobsCount, difficulty, minStringlength, maxStringlength int, authdata string, counter *ratecounter.RateCounter) []worker.Job {
 	jobs := make([]worker.Job, jobsCount)
 	for i := 0; i < jobsCount; i++ {
 		jobs[i] = worker.Job{
@@ -52,7 +56,8 @@ func GenerateWorkerJobs(jobsCount, difficulty, suffixLength int, authdata string
 			Args: Args{
 				Authdata:        authdata,
 				Difficulty:      difficulty,
-				SuffixLength:    suffixLength,
+				MinSuffixLength: minStringlength,
+				MaxSuffixLength: maxStringlength,
 				Seed:            int64(i),
 				HashrateCounter: counter,
 			},

@@ -27,7 +27,8 @@ type Miner struct {
 }
 
 var (
-	randomStringLength = 15
+	minRandomStringLength = 15
+	maxRandomStringLength = 30
 )
 
 func connect(configuration config.Data) (*connection.Connection, error) {
@@ -74,7 +75,9 @@ func (ctx *Miner) Run() error {
 	for {
 		// read one line (ended with \n or \r\n)
 		line, _ := connTextReader.ReadLine()
-		fmt.Println(line)
+		if len(line) > 0 {
+			fmt.Println(line)
+		}
 
 		switch line {
 		case "HELO":
@@ -140,7 +143,7 @@ func (ctx *Miner) Run() error {
 				}
 				fmt.Println("Authdata: ", ctx.Authdata, "Dificulty: ", difficulty)
 
-				jobs := GenerateWorkerJobs(ctx.WPool.GetWorkerCount(), difficulty, randomStringLength, ctx.Authdata, ctx.Counter)
+				jobs := GenerateWorkerJobs(ctx.WPool.GetWorkerCount(), difficulty, minRandomStringLength, maxRandomStringLength, ctx.Authdata, ctx.Counter)
 				go ctx.WPool.SendBulkJobs(jobs)
 
 				if suff, err := GetResults(ctx.WPool); err == nil && suff != "" {
@@ -152,6 +155,8 @@ func (ctx *Miner) Run() error {
 				// Stop goroutine hashRate
 				stop <- true
 				close(stop)
+
+				// TODO: add timeout of 2 hours.
 
 			} else if strings.HasPrefix(line, "ERROR") {
 				fmt.Println(line)
