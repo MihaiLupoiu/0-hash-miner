@@ -141,6 +141,9 @@ go build
 GOOS=linux GOARCH=amd64 go build -o linux
 ```
 
+High level diagram:
+
+![](./docs/minerUML.png)
 
 ## TODOS
 - [x] Create package.

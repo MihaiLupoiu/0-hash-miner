@@ -1,0 +1,33 @@
+@startuml
+component WorkerPool {
+   component "Runner" {
+}
+  component "JobChannel" {
+}
+   component "ResultsChannel" {
+}
+   component Pool {
+      [Worker.1]
+      [Worker.2]
+      [Worker.3]
+      [Worker...]
+}
+  Runner -> JobChannel : Send Job to workes
+  JobChannel -> Worker.1 : Get Job
+  JobChannel -> Worker.2 : Get Job
+  JobChannel -> Worker.3 : Get Job
+  JobChannel -> Worker... : Get Job
+  
+  Worker.1  -> ResultsChannel : Send Job
+  Worker.2  -> ResultsChannel : Send Job
+  Worker.3  -> ResultsChannel : Send Job
+  Worker... -> ResultsChannel : Send Job
+  
+  ResultsChannel -> Runner : Get Results
+
+  
+}
+[Miner]->[Server]
+[Miner]->[WorkerPool]
+[WorkerPool]->[Miner]
+@enduml
