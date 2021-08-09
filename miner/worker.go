@@ -12,6 +12,7 @@ import (
 	"github.com/paulbellamy/ratecounter"
 )
 
+// Args are the arguments passed from the Miner to the workerpool solver to search for the SHA1.
 type Args struct {
 	Authdata        string
 	Difficulty      int
@@ -21,6 +22,7 @@ type Args struct {
 	HashrateCounter *ratecounter.RateCounter
 }
 
+// FindHash is the function wrapper that is passed to the worke pools to calculates the SHA1 and check the difficulty.
 func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 	argVal, ok := args.(Args)
 	if !ok {
@@ -47,6 +49,7 @@ func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 	}
 }
 
+// GenerateWorkerJobs is a function that will generate as meny jobs as required to pass to the worker pool.
 func GenerateWorkerJobs(jobsCount, difficulty, minStringlength, maxStringlength int, authdata string, counter *ratecounter.RateCounter) []worker.Job {
 	jobs := make([]worker.Job, jobsCount)
 	for i := 0; i < jobsCount; i++ {
@@ -66,6 +69,7 @@ func GenerateWorkerJobs(jobsCount, difficulty, minStringlength, maxStringlength 
 	return jobs
 }
 
+// GetResults is a wrapper for a  blocking channel that returns the results from the worker pools.
 func GetResults(wPool worker.Pool) (string, error) {
 	select {
 	case r, ok := <-wPool.Results():

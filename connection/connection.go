@@ -10,12 +10,14 @@ import (
 
 // TODO: Test connection.
 
+// Connection has the basic configuration required to create the connection the the server.
 type Connection struct {
 	conn     *tls.Conn
 	conf     *tls.Config
 	endpoint string
 }
 
+// Dial will connect using with the server endpoint using the cert and key provided.
 func Dial(certFile, keyFile, endpoint string) (*Connection, error) {
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
@@ -41,27 +43,34 @@ func Dial(certFile, keyFile, endpoint string) (*Connection, error) {
 	}, nil
 }
 
+// Close the connection
 func (c *Connection) Close() error {
 	return c.conn.Close()
 }
 
+// Read bytes from the connection
 func (c *Connection) Read(b []byte) (int, error) {
 	return c.conn.Read(b)
 }
 
+// Write bytes to the connection
 func (c *Connection) Write(b []byte) (int, error) {
 	return c.conn.Write(b)
 }
 
+// WriteString writes a string to the connection and append a new line at the end.
 func (c *Connection) WriteString(b string) (int, error) {
 	return c.conn.Write([]byte(b + "\n"))
 }
 
-func (c *Connection) WriteSHA1String(authdata, arg, arg2 string) (int, error) {
-	hash := sha1.Sum([]byte(authdata + arg))
-	return c.WriteString(hex.EncodeToString(hash[:]) + " " + arg2)
+// WriteSHA1String writes a two string seperated by a space where
+// authdata, shaArg are used to generate the hash and stringArg is append after a space
+func (c *Connection) WriteSHA1String(authdata, shaArg, stringArg string) (int, error) {
+	hash := sha1.Sum([]byte(authdata + shaArg))
+	return c.WriteString(hex.EncodeToString(hash[:]) + " " + stringArg)
 }
 
+// Reconnecte will reconnect to the server.
 func (c *Connection) Reconnecte() error {
 	conn, err := tls.Dial("tcp", c.endpoint, c.conf)
 	if err != nil {
@@ -72,6 +81,7 @@ func (c *Connection) Reconnecte() error {
 	return nil
 }
 
+// PrintConnState will print the TLS connection state.
 func (c *Connection) PrintConnState() {
 	log.Print(">>>>>>>>>>>>>>>> State <<<<<<<<<<<<<<<<")
 	state := c.conn.ConnectionState()

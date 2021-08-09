@@ -18,6 +18,7 @@ import (
 	"github.com/paulbellamy/ratecounter"
 )
 
+// Miner has all the basic information to start the search for the SHA1
 type Miner struct {
 	Authdata   string
 	Conn       *connection.Connection
@@ -31,6 +32,7 @@ var (
 	maxRandomStringLength = 30
 )
 
+// connect creates the TLS connection required to the server in order to process the work.
 func connect(configuration config.Data) (*connection.Connection, error) {
 	conn, err := connection.Dial(configuration.Crt, configuration.Key, configuration.Endpoint)
 	if err != nil {
@@ -59,16 +61,13 @@ func Init(configuration config.Data) (*Miner, error) {
 	}, err
 }
 
+// Run miner will connect to the server, initialize the workes when request POW is received and
+// start to search for the SHA1 with the given dificulty.
 func (ctx *Miner) Run() error {
 	defer ctx.Conn.Close()
 
-	context, cancelWorkerPool := context.WithCancel(context.Background())
-	defer cancelWorkerPool()
-
-	// Start workers
-	go ctx.WPool.Run(context)
-
 	stop := make(chan bool, 1)
+	defer close(stop)
 	go utils.HashRate(ctx.Counter, stop)
 
 	connTextReader := textproto.NewReader(bufio.NewReader(ctx.Conn))
@@ -143,25 +142,33 @@ func (ctx *Miner) Run() error {
 				}
 				fmt.Println("Authdata: ", ctx.Authdata, "Dificulty: ", difficulty)
 
+				// create context fro workerPool
+				minerCtx, cancelWorkerPool := context.WithTimeout(context.Background(), time.Hour*2)
+				defer cancelWorkerPool()
+
+				// Start workers
+				go ctx.WPool.Run(minerCtx)
+
 				jobs := GenerateWorkerJobs(ctx.WPool.GetWorkerCount(), difficulty, minRandomStringLength, maxRandomStringLength, ctx.Authdata, ctx.Counter)
 				go ctx.WPool.SendBulkJobs(jobs)
 
-				if suff, err := GetResults(ctx.WPool); err == nil && suff != "" {
+				suff, err := GetResults(ctx.WPool)
+				if err == context.DeadlineExceeded {
+					fmt.Println("Dedline reached: ", err.Error())
+					break
+				}
+
+				if err == nil && suff != "" {
 					fmt.Println("Suff: ", suff)
 					ctx.Conn.WriteString(suff)
 					break
 				}
-
-				// Stop goroutine hashRate
-				stop <- true
-				close(stop)
-
-				// TODO: add timeout of 2 hours.
-
 			} else if strings.HasPrefix(line, "ERROR") {
 				fmt.Println(line)
 				return nil
 			}
 		}
+		// Stop goroutine hashRate
+		stop <- true
 	}
 }

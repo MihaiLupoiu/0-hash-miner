@@ -42,7 +42,7 @@ func RandStringRunes(length int) (string, error) {
 	return string(bytes), nil
 }
 
-// TODO: Add channel to close goroutine gracefully
+// HashRate will print the mega hash rate per second.
 func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
 	t := time.NewTimer(time.Second)
 	interval := time.Second * time.Duration(1)

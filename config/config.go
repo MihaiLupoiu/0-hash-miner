@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Data is the structure that stores all arguments passed to the miner.
 type Data struct {
 	Crt        string
 	Key        string
@@ -44,6 +45,7 @@ func getUserConfigurationFile(configFile string) UserConfig {
 	return userConfig
 }
 
+// Get will parshe the args and return the configuration in the Data structure.
 func Get() Data {
 	var config Data
 

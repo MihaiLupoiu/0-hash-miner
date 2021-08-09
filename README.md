@@ -102,11 +102,45 @@ Notes:
   3336, 8083, 8446, 49155, 3481, 65532
 
 
-### RUN code
-
+### RUN miner
 ```
 go run main.go -connect 18.202.148.130:3336
 ```
+
+### RUN miner help
+```
+go run main.go -h
+```
+
+### RUN test
+```
+cd test
+go run solverFunction.go
+```
+
+### RUN test helper
+```
+cd test
+go run solverFunction.go -h
+```
+
+### Run pprof test
+```
+cd test
+go run solverFunction.go
+go tool pprof -http=":8081" cpu.pprof test
+```
+
+### Build miner
+```
+go build
+```
+
+### Build miner or test for linux or other architectures
+```
+GOOS=linux GOARCH=amd64 go build -o linux
+```
+
 
 ## TODOS
 - [x] Create package.
@@ -116,9 +150,10 @@ go run main.go -connect 18.202.148.130:3336
    - Generating random string using math/rand for speed performance. Also available the SecureRandomString to generate a cryptography secure random. 
 - [x] Calculate sha1.
 - [x] Calculate compare hash with dificulty.
-- [ ] Improve code structure to split responsibilities.
+- [x] Improve code structure to split responsibilities.
 - [ ] Test functions. 
-   - Especially the solver for each dificulty.
+   - [x] Especially the solver for each dificulty.
+   - [] Miner to test localy.
 - [ ] Improve loggin using zap. 
 - [ ] Improve flags to specify log level.
 - [x] Add contact information in a configuration file. 
@@ -130,10 +165,11 @@ go run main.go -connect 18.202.148.130:3336
    - Yes in increased but after making some changes in the gorutine. The initial implementation was waiting too much time for work so it was not taking advantage of all the CPU cores because it was communicating too much data.
    - Second implementation was executing the process completlly independent and was able to take full advantage of the CPUs.
 - [x] Execute against the server in a multicore CPU with more than 2 cores than my 2013 i5 Macbook pro. 
-   - Tried a 32 Core from Scaleway for this test. Not recommended. The CPU was only using 10 out of the 32 cores in the same time.
-   - Tested in local I5 CPU and got an increase MH/s from 1,4 in th Mac to 3,2 MH/s.
+   - Tried a 32 Core from both AWS and Scaleway for this test. The CPU was only using 10 out of the 32 cores in the same time.
+   - Tested in local I5 CPU and got an increase MH/s from 1,4 in th Mac to 2,9 MH/s.
 - [ ] Improve state machine processing. Low priority for now.
 - [x] Show number of Hash/second.
-- [ ] Documentation in code and architecture diagram.
+- [x] Documentation in code.
+- [ ] Distributed architecture diagram.
 - [ ] Implement a SHA1 calculation using GPU.
    - If time available, if not create a small explination on how it could be done.

@@ -1,3 +1,4 @@
+// package is used to test the speed of the solver and the different corutines implementations
 package main
 
 import (
@@ -90,6 +91,7 @@ func main() {
 	// authdata := "fSHmbbPePDavjmRTSdOITaUnTtBkbPcnIiYjWemfoBMUoGZNTmIPrnNEUAGtYrKn"
 	authdata := "cQokBByiRKwFNFhsXUvtTuEwRPwXdFjBeLjelxqPXoQHhIZaXMucoBSBpKFRkDFR"
 
+	// Generate CPU pprof
 	f, err := os.Create("cpu.pprof")
 	if err != nil {
 		log.Fatal("could not create CPU profile: ", err)
@@ -104,6 +106,7 @@ func main() {
 
 	testCorutine(authdata, workers, difficulty, minStringlength, maxStringLength)
 
+	// Generate memory pprof
 	f2, err := os.Create("mem.pprof")
 	if err != nil {
 		log.Fatal("could not create memory profile: ", err)

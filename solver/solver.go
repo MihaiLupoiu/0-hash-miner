@@ -32,6 +32,7 @@ func CalculateAndCheckHash(authdata, suffix string, difficulty int) string {
 	return ""
 }
 
+// CalculateHash will generate the SHA1 of the arguments.
 func CalculateHash(ctx context.Context, args interface{}) (interface{}, error) {
 	argVal, ok := args.(string)
 	if !ok {
@@ -41,6 +42,7 @@ func CalculateHash(ctx context.Context, args interface{}) (interface{}, error) {
 	return sha1.Sum([]byte(argVal)), nil
 }
 
+// CalculateHash will check if the hash has the dificulty ammount of 0 as a suffix.
 func CheckDificulty(hash [20]byte, dificulty int) bool {
 	return hexStartsWith(hash, dificulty)
 }
