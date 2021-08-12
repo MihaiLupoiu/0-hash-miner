@@ -1,4 +1,4 @@
-package config
+package miner
 
 import (
 	"encoding/json"

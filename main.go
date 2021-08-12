@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/MihaiLupoiu/interview-exasol/config"
 	"github.com/MihaiLupoiu/interview-exasol/miner"
 )
 
@@ -23,7 +22,7 @@ func main() {
 }
 
 func run(args []string, stdout io.Writer) error {
-	configuration := config.Get()
+	configuration := miner.Get()
 
 	minerCtx, err := miner.Init(configuration)
 	if err != nil {

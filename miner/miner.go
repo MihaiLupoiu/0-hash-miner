@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MihaiLupoiu/interview-exasol/config"
 	"github.com/MihaiLupoiu/interview-exasol/connection"
 	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/MihaiLupoiu/interview-exasol/worker"
@@ -23,7 +22,7 @@ type Miner struct {
 	Authdata   string
 	Conn       *connection.Connection
 	Counter    *ratecounter.RateCounter
-	UserConfig config.UserConfig
+	UserConfig UserConfig
 	WPool      worker.Pool
 }
 
@@ -33,7 +32,7 @@ var (
 )
 
 // connect creates the TLS connection required to the server in order to process the work.
-func connect(configuration config.Data) (*connection.Connection, error) {
+func connect(configuration Data) (*connection.Connection, error) {
 	conn, err := connection.Dial(configuration.Crt, configuration.Key, configuration.Endpoint)
 	if err != nil {
 		log.Fatalf("failed to connect: %s", err.Error())
@@ -47,7 +46,7 @@ func connect(configuration config.Data) (*connection.Connection, error) {
 }
 
 // Init miner with configuration with connection data and user information.
-func Init(configuration config.Data) (*Miner, error) {
+func Init(configuration Data) (*Miner, error) {
 	conn, err := connect(configuration)
 	if err != nil {
 		return nil, err
