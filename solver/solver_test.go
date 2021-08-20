@@ -177,3 +177,81 @@ func TestCheckDificulty(t *testing.T) {
 		})
 	}
 }
+
+func TestSearchForHashWithDificulty(t *testing.T) {
+	type args struct {
+		authdata   []byte
+		length     int
+		difficulty int
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "Testing new solver",
+			args: args{
+				authdata:   []byte("cQokBByiRKwFNFhsXUvtTuEwRPwXdFjBeLjelxqPXoQHhIZaXMucoBSBpKFRkDFR"),
+				length:     32,
+				difficulty: 9,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			SearchForHashWithDificulty(tt.args.authdata, tt.args.length, tt.args.difficulty)
+		})
+	}
+}
+
+func TestHexStartsWith3(t *testing.T) {
+	type args struct {
+		hash      []byte
+		dificulty int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "Testing valid dificulty 6 hash",
+			args: args{
+				hash:      []byte{0, 0, 0, 190, 110, 86, 14, 127, 67, 132, 46, 46, 33, 183, 116, 230, 29, 133, 240, 71},
+				dificulty: 6,
+			},
+			want: true,
+		},
+		{
+			name: "Testing invalid dificulty 2 hash",
+			args: args{
+				hash:      []byte{7, 195, 66, 190, 110, 86, 14, 127, 67, 132, 46, 46, 33, 183, 116, 230, 29, 133, 240, 71},
+				dificulty: 2,
+			},
+			want: false,
+		},
+		{
+			name: "Testing invalid dificulty hash",
+			args: args{
+				hash:      []byte{48, 48, 173, 195, 152, 181, 227, 131, 214, 50, 135, 230, 158, 235, 173, 65, 253, 164, 140, 187},
+				dificulty: 2,
+			},
+			want: false,
+		},
+		{
+			name: "Testing valid dificulty 9 hash",
+			args: args{
+				hash:      []byte{0, 0, 0, 0, 7, 86, 14, 127, 67, 132, 46, 46, 33, 183, 116, 230, 29, 133, 240, 71},
+				dificulty: 9,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := HexStartsWith3(tt.args.hash, tt.args.dificulty); got != tt.want {
+				t.Errorf("HexStartsWith3() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

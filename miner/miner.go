@@ -3,6 +3,7 @@ package miner
 import (
 	"bufio"
 	"context"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"net/textproto"
@@ -15,6 +16,9 @@ import (
 	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/MihaiLupoiu/interview-exasol/worker"
 	"github.com/paulbellamy/ratecounter"
+
+	crypto_rand "crypto/rand"
+	math_rand "math/rand"
 )
 
 // Miner has all the basic information to start the search for the SHA1
@@ -27,9 +31,18 @@ type Miner struct {
 }
 
 var (
-	minRandomStringLength = 15
-	maxRandomStringLength = 30
+	minRandomStringLength = 5
+	maxRandomStringLength = 64
 )
+
+func initSeed() {
+	var b [8]byte
+	_, err := crypto_rand.Read(b[:])
+	if err != nil {
+		panic("cannot seed math/rand package with cryptographically secure random number generator")
+	}
+	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
+}
 
 // connect creates the TLS connection required to the server in order to process the work.
 func connect(configuration Data) (*connection.Connection, error) {
@@ -47,6 +60,7 @@ func connect(configuration Data) (*connection.Connection, error) {
 
 // Init miner with configuration with connection data and user information.
 func Init(configuration Data) (*Miner, error) {
+	initSeed()
 	conn, err := connect(configuration)
 	if err != nil {
 		return nil, err

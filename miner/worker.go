@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/MihaiLupoiu/interview-exasol/solver"
 	"github.com/MihaiLupoiu/interview-exasol/utils"
 	"github.com/MihaiLupoiu/interview-exasol/worker"
 	"github.com/paulbellamy/ratecounter"
@@ -22,6 +21,7 @@ type Args struct {
 	HashrateCounter *ratecounter.RateCounter
 }
 
+/*
 // FindHash is the function wrapper that is passed to the worke pools to calculates the SHA1 and check the difficulty.
 func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 	argVal, ok := args.(Args)
@@ -48,6 +48,36 @@ func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 		}
 	}
 }
+*/
+
+// FindHash2 is the function wrapper that is passed to the worke pools to calculates the SHA1 and check the difficulty.
+func FindHash2(ctx context.Context, args interface{}) (interface{}, error) {
+	argVal, ok := args.(Args)
+	if !ok {
+		return nil, errors.New("wrong argument type")
+	}
+
+	length := rand.Intn(argVal.MaxSuffixLength-argVal.MinSuffixLength+1) + argVal.MinSuffixLength
+	authdata := []byte(argVal.Authdata)
+	suffix := make([]byte, length)
+	var hashConetext = utils.NewHash(authdata)
+
+	for {
+		utils.RandomUTF8(suffix)
+		argVal.HashrateCounter.Incr(1)
+
+		hash := hashConetext.Sum(suffix)
+
+		if utils.CheckDificulty(hash, argVal.Difficulty) {
+			fmt.Printf("Authdata: %s\nSuffix: %s\nDifficulty: %d\n", authdata, suffix, argVal.Difficulty)
+			return string(suffix), nil
+		}
+
+		if ctx.Err() == context.Canceled {
+			return "", nil
+		}
+	}
+}
 
 // GenerateWorkerJobs is a function that will generate as meny jobs as required to pass to the worker pool.
 func GenerateWorkerJobs(jobsCount, difficulty, minStringlength, maxStringlength int, authdata string, counter *ratecounter.RateCounter) []worker.Job {
@@ -55,7 +85,7 @@ func GenerateWorkerJobs(jobsCount, difficulty, minStringlength, maxStringlength 
 	for i := 0; i < jobsCount; i++ {
 		jobs[i] = worker.Job{
 			ID:     fmt.Sprintf("%v", i),
-			ExecFn: FindHash,
+			ExecFn: FindHash2,
 			Args: Args{
 				Authdata:        authdata,
 				Difficulty:      difficulty,
