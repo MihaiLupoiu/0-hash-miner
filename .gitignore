@@ -4,3 +4,4 @@
 *.crt
 *.ca
 config/config.json
+*.pprof
