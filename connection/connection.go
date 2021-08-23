@@ -61,7 +61,7 @@ func (c *Connection) Write(b []byte) (int, error) {
 // WriteString writes a string to the connection and append a new line at the end.
 func (c *Connection) WriteString(b string) (int, error) {
 	log.Println(b)
-	return c.conn.Write([]byte(b + "\n"))
+	return c.Write([]byte(b + "\n"))
 }
 
 // WriteSHA1String writes a two string seperated by a space where

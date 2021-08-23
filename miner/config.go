@@ -25,7 +25,7 @@ type UserConfig struct {
 	Skype     string   `json:"Skype"`
 	BirthDate string   `json:"BirthDate"`
 	Country   string   `json:"Country"`
-	Addess    []string `json:"Addess"`
+	Address   []string `json:"Address"`
 }
 
 // GetUserConfigurationFile parshe json with user contact information file.

@@ -103,10 +103,10 @@ func (ctx *Miner) Run() error {
 				ctx.Conn.WriteSHA1String(ctx.Authdata, line, strconv.Itoa(len(ctx.UserConfig.Mails)))
 
 			case "MAIL1":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Mails[1])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Mails[0])
 
 			case "MAIL2":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Mails[2])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Mails[1])
 
 			case "SKYPE":
 				// here please specify your Skype account for the interview, or N/A
@@ -126,13 +126,13 @@ func (ctx *Miner) Run() error {
 			case "ADDRNUM":
 				// specifies how many lines your address has, this address should
 				// be in the specified country
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, strconv.Itoa(len(ctx.UserConfig.Addess)))
+				ctx.Conn.WriteSHA1String(ctx.Authdata, line, strconv.Itoa(len(ctx.UserConfig.Address)))
 
 			case "ADDRLINE1":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Addess[1])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Address[0])
 
 			case "ADDRLINE2":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Addess[2])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Address[1])
 
 			case "POW":
 				log.Println("Searching for HASH:")
