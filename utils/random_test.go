@@ -8,6 +8,8 @@ import (
 )
 
 func Test_RandomUTF8(t *testing.T) {
+	randomGenerator := InitRandomWithSeed(1)
+
 	type args struct {
 		randomString []byte
 	}
@@ -28,7 +30,7 @@ func Test_RandomUTF8(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			rand.Seed(1)
-			if err := RandomUTF8(tt.args.randomString); (err != nil) != tt.wantErr {
+			if err := RandomUTF8(randomGenerator, tt.args.randomString); (err != nil) != tt.wantErr {
 				t.Errorf("RandomUTF8() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
@@ -59,8 +61,10 @@ func BenchmarkRandASCIIBytes32(b *testing.B) {
 
 func BenchmarkRandomUTF8_32(b *testing.B) {
 	suffix := make([]byte, 32)
+	randomGenerator := InitRandomWithSeed(1)
+
 	for n := 0; n < b.N; n++ {
-		RandomUTF8(suffix)
+		RandomUTF8(randomGenerator, suffix)
 	}
 }
 
@@ -84,7 +88,9 @@ func BenchmarkRandASCIIBytes256(b *testing.B) {
 
 func BenchmarkRandomUTF8_256(b *testing.B) {
 	suffix := make([]byte, 256)
+	randomGenerator := InitRandomWithSeed(1)
+
 	for n := 0; n < b.N; n++ {
-		RandomUTF8(suffix)
+		RandomUTF8(randomGenerator, suffix)
 	}
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"testing"
 )
@@ -110,5 +111,46 @@ func TestHexStartsWith3(t *testing.T) {
 				t.Errorf("HexStartsWith3() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestHash_SumOneSuffix(t *testing.T) {
+	authdata := []byte("cQokBByiRKwFNFhsXUvtTuEwRPwXdFjBeLjelxqPXoQHhIZaXMucoBSBpKFRkDFR")
+	suffix1 := []byte("sba(BE(p7`\"0]%>5X),n1$?n>~%(6G+j")
+
+	bytesToProcess := make([]byte, len(authdata)+len(suffix1))
+	copy(bytesToProcess, authdata)
+	copy(bytesToProcess[len(authdata):], suffix1)
+
+	expectedHash := sha1.Sum(bytesToProcess)
+
+	var hashConetext = NewHash(authdata)
+	hash := hashConetext.Sum(suffix1)
+
+	if !bytes.Equal(expectedHash[:], hash) {
+		t.Errorf("TestHash_SumOneSuffix() = %v, want %v", hash, expectedHash)
+	}
+}
+
+func TestHash_SumSecondSuffix(t *testing.T) {
+	authdata := []byte("cQokBByiRKwFNFhsXUvtTuEwRPwXdFjBeLjelxqPXoQHhIZaXMucoBSBpKFRkDFR")
+	suffix1 := []byte("sba(BE(p7`\"0]%>5X),n1$?n>~%(6G+j")
+	suffix2 := []byte("rl[N)VMT}3ZTox!',J_^kX{y;g}NNP^e")
+
+	bytesToProcess := make([]byte, len(authdata)+len(suffix1))
+	copy(bytesToProcess, authdata)
+	copy(bytesToProcess[len(authdata):], suffix2)
+
+	expectedHash := sha1.Sum(bytesToProcess)
+	t.Log(expectedHash)
+
+	var hashConetext = NewHash(authdata)
+	hash1 := hashConetext.Sum(suffix1)
+	t.Log(hash1)
+	hash2 := hashConetext.Sum(suffix2)
+	t.Log(hash2)
+
+	if !bytes.Equal(expectedHash[:], hash2) {
+		t.Errorf("TestHash_SumOneSuffix() = %v, want %v", hash2, expectedHash)
 	}
 }

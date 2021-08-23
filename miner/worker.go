@@ -57,13 +57,15 @@ func FindHash2(ctx context.Context, args interface{}) (interface{}, error) {
 		return nil, errors.New("wrong argument type")
 	}
 
+	randomGenerator := utils.InitRandomWithRandomSeed()
+
 	length := rand.Intn(argVal.MaxSuffixLength-argVal.MinSuffixLength+1) + argVal.MinSuffixLength
 	authdata := []byte(argVal.Authdata)
 	suffix := make([]byte, length)
 	var hashConetext = utils.NewHash(authdata)
 
 	for {
-		utils.RandomUTF8(suffix)
+		utils.RandomUTF8(randomGenerator, suffix)
 		argVal.HashrateCounter.Incr(1)
 
 		hash := hashConetext.Sum(suffix)

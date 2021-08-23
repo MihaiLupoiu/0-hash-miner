@@ -3,8 +3,10 @@ package utils
 
 import (
 	"crypto/rand"
+	crypto_rand "crypto/rand"
+	"encoding/binary"
 	"fmt"
-	mrand "math/rand"
+	math_rand "math/rand"
 	"time"
 
 	"github.com/paulbellamy/ratecounter"
@@ -20,6 +22,21 @@ var utf8Chars = [...]byte{0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 
 	0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65,
 	0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77,
 	0x78, 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e}
+
+func InitRandomWithRandomSeed() *math_rand.Rand {
+	var b [8]byte
+	_, err := crypto_rand.Read(b[:])
+	if err != nil {
+		panic("cannot seed math/rand package with cryptographically secure random number generator")
+	}
+	source := math_rand.NewSource(int64(binary.LittleEndian.Uint64(b[:])))
+	return math_rand.New(source)
+}
+
+func InitRandomWithSeed(seed int) *math_rand.Rand {
+	source := math_rand.NewSource(int64(seed))
+	return math_rand.New(source)
+}
 
 // SecureRandomString generates a cryptography secure random string but at cost of performance
 func SecureRandomString(length int) (string, error) {
@@ -40,7 +57,7 @@ func SecureRandomString(length int) (string, error) {
 func RandStringRunes(length int) (string, error) {
 	bytes := make([]byte, length)
 
-	if _, err := mrand.Read(bytes); err != nil {
+	if _, err := math_rand.Read(bytes); err != nil {
 		return "", err
 	}
 
@@ -84,6 +101,7 @@ func RandASCIIBytes(n int) []byte {
 func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
 	t := time.NewTimer(time.Second)
 	interval := time.Second * time.Duration(1)
+	fmt.Print("\033[s") // save the cursor position
 
 	for {
 		select {
@@ -91,14 +109,15 @@ func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
 			fmt.Println("Closing HashRate gorutine")
 			return
 		case <-t.C:
-			fmt.Println(float64(counter.Rate())/float64(1000000), "Mh/s")
+			fmt.Print("\033[u\033[K")
+			fmt.Printf("%f MH/s", float64(counter.Rate())/float64(1000000))
 		}
 		t.Reset(interval)
 	}
 }
 
-func RandomUTF8(randomString []byte) error {
-	if _, err := mrand.Read(randomString); err != nil {
+func RandomUTF8(randomGenerator *math_rand.Rand, randomString []byte) error {
+	if _, err := randomGenerator.Read(randomString); err != nil {
 		return err
 	}
 
