@@ -3,9 +3,13 @@ package utils
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"hash"
 	"reflect"
 	"strings"
+	"time"
+
+	"github.com/paulbellamy/ratecounter"
 )
 
 type Hash struct {
@@ -88,4 +92,23 @@ func CheckDificulty(hash []byte, dificulty int) bool {
 		}
 	}
 	return true
+}
+
+// HashRate will print the mega hash rate per second.
+func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
+	t := time.NewTimer(time.Second)
+	interval := time.Second * time.Duration(1)
+	fmt.Print("\033[s") // save the cursor position
+
+	for {
+		select {
+		case <-stop:
+			fmt.Println("Closing HashRate gorutine")
+			return
+		case <-t.C:
+			fmt.Print("\033[u\033[K")
+			fmt.Printf("%f MH/s", float64(counter.Rate())/float64(1000000))
+		}
+		t.Reset(interval)
+	}
 }

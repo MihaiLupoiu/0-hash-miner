@@ -5,11 +5,7 @@ import (
 	"crypto/rand"
 	crypto_rand "crypto/rand"
 	"encoding/binary"
-	"fmt"
 	math_rand "math/rand"
-	"time"
-
-	"github.com/paulbellamy/ratecounter"
 )
 
 const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -95,25 +91,6 @@ func RandASCIIBytes(n int) []byte {
 	}
 
 	return output
-}
-
-// HashRate will print the mega hash rate per second.
-func HashRate(counter *ratecounter.RateCounter, stop chan bool) {
-	t := time.NewTimer(time.Second)
-	interval := time.Second * time.Duration(1)
-	fmt.Print("\033[s") // save the cursor position
-
-	for {
-		select {
-		case <-stop:
-			fmt.Println("Closing HashRate gorutine")
-			return
-		case <-t.C:
-			fmt.Print("\033[u\033[K")
-			fmt.Printf("%f MH/s", float64(counter.Rate())/float64(1000000))
-		}
-		t.Reset(interval)
-	}
 }
 
 func RandomUTF8(randomGenerator *math_rand.Rand, randomString []byte) error {
