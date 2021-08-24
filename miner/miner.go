@@ -95,44 +95,44 @@ func (ctx *Miner) Run() error {
 			case "NAME":
 				// as the response to the NAME request you should send your full name
 				// including first and last name separated by single space
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Name)
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Name)
 
 			case "MAILNUM":
 				// here you specify, how many email addresses you want to send
 				// each email is asked separately up to the number specified in MAILNUM
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, strconv.Itoa(len(ctx.UserConfig.Mails)))
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], strconv.Itoa(len(ctx.UserConfig.Mails)))
 
 			case "MAIL1":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Mails[0])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Mails[0])
 
 			case "MAIL2":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Mails[1])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Mails[1])
 
 			case "SKYPE":
 				// here please specify your Skype account for the interview, or N/A
 				// in case you have no Skype account
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Skype)
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Skype)
 
 			case "BIRTHDATE":
 				// here please specify your birthdate in the format %d.%m.%Y
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.BirthDate)
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.BirthDate)
 
 			case "COUNTRY":
 				// country where you currently live and where the specified address is
 				// please use only the names from this web site:
 				//   https://www.countries-ofthe-world.com/all-countries.html
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Country)
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Country)
 
 			case "ADDRNUM":
 				// specifies how many lines your address has, this address should
 				// be in the specified country
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, strconv.Itoa(len(ctx.UserConfig.Address)))
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], strconv.Itoa(len(ctx.UserConfig.Address)))
 
 			case "ADDRLINE1":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Address[0])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Address[0])
 
 			case "ADDRLINE2":
-				ctx.Conn.WriteSHA1String(ctx.Authdata, line, ctx.UserConfig.Address[1])
+				ctx.Conn.WriteSHA1String(ctx.Authdata, args[1], ctx.UserConfig.Address[1])
 
 			case "POW":
 				log.Println("Searching for HASH:")
