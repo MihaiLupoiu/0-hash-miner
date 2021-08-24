@@ -97,9 +97,10 @@ func SearchForHashWithDificulty(authdata []byte, length int, dificulty int) {
 	bytes := make([]byte, len(authdata)+length)
 
 	copy(bytes, authdata)
+	randomGenerator := utils.InitRandomWithRandomSeed()
 
 	suffix := bytes[len(authdata):]
-	utils.RandomUTF8(suffix)
+	utils.RandomUTF8(randomGenerator, suffix)
 }
 
 /*
