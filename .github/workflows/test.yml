@@ -18,12 +18,10 @@ jobs:
     - name: Install dependencies
       run: |
         go version
-        go get -u golang.org/x/lint/golint
     # Run vet & lint on the code
     - name: Run vet & lint
       run: |
         go vet .
-        golint .
     - name: Test
       run: go test ./...
     # Run build of the application
