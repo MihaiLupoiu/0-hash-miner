@@ -151,8 +151,8 @@ High level diagram:
 - [x] Generate randon string.
    - ~~Using random uuid from google.~~
    - Generating random string using math/rand for speed performance. Also available the SecureRandomString to generate a cryptography secure random. 
-- [x] Calculate sha1.
-- [x] Calculate compare hash with dificulty.
+- [x] calculate sha1.
+- [x] calculate compare hash with dificulty.
 - [x] Improve code structure to split responsibilities.
 - [ ] Test functions. 
    - [x] Especially the solver for each dificulty.

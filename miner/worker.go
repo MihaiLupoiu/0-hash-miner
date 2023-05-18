@@ -22,7 +22,7 @@ type Args struct {
 }
 
 /*
-// FindHash is the function wrapper that is passed to the worke pools to calculates the SHA1 and check the difficulty.
+// FindHash is the function wrapper that is passed to the worker pools to calculates the SHA1 and check the difficulty.
 func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 	argVal, ok := args.(Args)
 	if !ok {
@@ -50,7 +50,7 @@ func FindHash(ctx context.Context, args interface{}) (interface{}, error) {
 }
 */
 
-// FindHash2 is the function wrapper that is passed to the worke pools to calculates the SHA1 and check the difficulty.
+// FindHash2 is the function wrapper that is passed to the worker pools to calculates the SHA1 and check the difficulty.
 func FindHash2(ctx context.Context, args interface{}) (interface{}, error) {
 	argVal, ok := args.(Args)
 	if !ok {
@@ -81,7 +81,7 @@ func FindHash2(ctx context.Context, args interface{}) (interface{}, error) {
 	}
 }
 
-// GenerateWorkerJobs is a function that will generate as meny jobs as required to pass to the worker pool.
+// GenerateWorkerJobs is a function that will generate as many jobs as required to pass to the worker pool.
 func GenerateWorkerJobs(jobsCount, difficulty, minStringlength, maxStringlength int, authdata string, counter *ratecounter.RateCounter) []worker.Job {
 	jobs := make([]worker.Job, jobsCount)
 	for i := 0; i < jobsCount; i++ {

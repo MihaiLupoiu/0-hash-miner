@@ -64,7 +64,7 @@ func HexStartsWith3(hash []byte, dificulty int) bool {
 	return true
 }
 
-// CalculateAndCheckHash calculates the SHA1 of the authdata + suffix and that it starst with as meny 0s as the difficulty number.
+// CalculateAndCheckHash calculates the SHA1 of the authdata + suffix and that it starst with as many 0s as the difficulty number.
 func CalculateAndCheckHash(authdata, suffix string, difficulty int) string {
 	cksum_in_hex := sha1.Sum([]byte(authdata + suffix))
 	// fmt.Printf("  SHA1: %x\n", cksum_in_hex)

@@ -64,8 +64,8 @@ func Init(configuration Data) (*Miner, error) {
 	}, err
 }
 
-// Run miner will connect to the server, initialize the workes when request POW is received and
-// start to search for the SHA1 with the given dificulty.
+// Run miner will connect to the server, initialize the workers when request POW is received and
+// start to search for the SHA1 with the given difficulty.
 func (ctx *Miner) Run() error {
 	defer ctx.Conn.Close()
 
