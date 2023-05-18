@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/MihaiLupoiu/interview-exasol/workflows/Test/badge.svg)](https://github.com/MihaiLupoiu/interview-exasol/actions)
-[![codecov](https://codecov.io/gh/MihaiLupoiu/interview-exasol/branch/main/graph/badge.svg?token=N15FQSWTAW)](https://codecov.io/gh/MihaiLupoiu/interview-exasol)
+[![codecov](https://codecov.io/gh/MihaiLupoiu/interview-exasol/branch/main/graph/badge.svg?token=N15FQSWTAW)](https://codecov.io/gh/MihaiLupoiu/0-hash-miner)
 
 As part of our application process, we would like you to write a test
 program that we could later discuss in your interview. The data you
